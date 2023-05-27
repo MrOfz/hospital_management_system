@@ -1,0 +1,72 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1116",
+      "name": "账户",
+      "font_class": "zhanghu",
+      "unicode": "f00bb",
+      "unicode_decimal": 983227
+    },
+    {
+      "icon_id": "7056306",
+      "name": "收费",
+      "font_class": "shoufei",
+      "unicode": "e631",
+      "unicode_decimal": 58929
+    },
+    {
+      "icon_id": "8288903",
+      "name": "药品",
+      "font_class": "yaopin",
+      "unicode": "e858",
+      "unicode_decimal": 59480
+    },
+    {
+      "icon_id": "9472083",
+      "name": "密码",
+      "font_class": "mima",
+      "unicode": "e638",
+      "unicode_decimal": 58936
+    },
+    {
+      "icon_id": "10056219",
+      "name": "医生",
+      "font_class": "yisheng",
+      "unicode": "e6fa",
+      "unicode_decimal": 59130
+    },
+    {
+      "icon_id": "10056239",
+      "name": "病房患者",
+      "font_class": "bingfanghuanzhe",
+      "unicode": "e705",
+      "unicode_decimal": 59141
+    },
+    {
+      "icon_id": "11066221",
+      "name": "全科",
+      "font_class": "quanke-",
+      "unicode": "e6db",
+      "unicode_decimal": 59099
+    },
+    {
+      "icon_id": "14015755",
+      "name": "-_病人2",
+      "font_class": "-_bingren",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    },
+    {
+      "icon_id": "28781233",
+      "name": "医院端-职工管理",
+      "font_class": "yiyuanduan-zhigongguanli",
+      "unicode": "e640",
+      "unicode_decimal": 58944
+    }
+  ]
+}

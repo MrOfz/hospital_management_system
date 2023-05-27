@@ -1,0 +1,1 @@
+var web_prefix = '/hospital_backend'

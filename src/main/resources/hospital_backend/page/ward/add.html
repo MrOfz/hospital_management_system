@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="../../plugins/element-ui/lib/theme-chalk/index.css" />
+  <link rel="stylesheet" href="../../styles/common.css" />
+  <link rel="stylesheet" href="../../styles/page.css" />
+</head>
+<body>
+  <div class="addBrand-container" id="member-add-app">
+    <div class="container">
+      <el-form
+        ref="ruleForm"
+        :model="ruleForm"
+        :rules="rules"
+        :inline="false"
+        label-width="180px"
+        class="demo-ruleForm"
+      >
+        <!--所属科室-->
+        <el-form-item
+            label="所属科室:"
+            prop="deptId"
+        >
+          <el-select
+              v-model="ruleForm.deptId"
+              placeholder="请选择科室名称"
+          >
+            <el-option v-for="(item,index) in deptList" :key="index" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
+
+
+        <!--科室负责人-->
+        <el-form-item
+            label="科室负责人:"
+            prop="deptHead"
+        >
+          <el-select
+              v-model="ruleForm.deptHead"
+              placeholder="请选择科室负责人"
+          >
+            <el-option v-for="(item,index) in deptList" :key="index" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
+
+
+      <!--所属病房号-->
+        <el-form-item
+            label="病房号:"
+            prop="wardNumber"
+        >
+          <el-input
+              v-model="ruleForm.wardNumber"
+              placeholder="请输入病房号"
+          />
+        </el-form-item>
+
+        <!--床位数-->
+        <el-form-item
+          label="床位数:"
+          prop="bedCount"
+        >
+          <el-input
+            v-model="ruleForm.bedCount"
+            placeholder="请输入床位数"
+          />
+        </el-form-item>
+
+        <div class="subBox address">
+          <el-form-item>
+            <el-button  @click="goBack()">
+              取消
+            </el-button>
+            <el-button
+              type="primary"
+              @click="submitForm('ruleForm', false)"
+            >
+              保存
+            </el-button>
+          </el-form-item>
+        </div>
+      </el-form>
+    </div>
+  </div>
+    <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+    <script src="../../plugins/vue/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/lib/index.js"></script>
+    <!-- 引入axios -->
+    <script src="../../plugins/axios/axios.min.js"></script>
+    <script src="../../js/request.js"></script>
+    <script src="../../api/ward.js"></script>
+    <script src="../../js/validate.js"></script>
+    <script src="../../js/index.js"></script>
+    <script>
+      new Vue({
+        el: '#member-add-app',
+        data() {
+          return {
+            id: '',
+            actionType : '',
+            deptList: [],
+            ruleForm : {
+                bedCount: '',
+                wardNumber: '',
+                deptHead: '',
+                deptId: ''
+            }
+          }
+        },
+        computed: {
+          rules () {
+            return {
+              bedCount: [{ required: true, 'validator': checkBedNumber, 'trigger': 'blur' }],
+            }
+          }
+        },
+        created() {
+          this.getWardList()
+          this.id = requestUrlParam('id')
+          this.actionType = this.id ? 'edit' : 'add'
+          if (this.id) {
+            this.init()
+          }
+        },
+        mounted() {
+        },
+        methods: {
+          async init () {
+            //修改病房信息
+            queryWardById(this.id).then(res => {
+              console.log(res)
+              if (String(res.code) === '1') {
+                console.log(res.data)
+                this.ruleForm = res.data
+              } else {
+                this.$message.error(res.msg || '操作失败')
+              }
+            })
+          },
+          submitForm (formName, st) {
+            this.$refs[formName].validate((valid) => {
+              if (valid) {
+                if (this.actionType === 'add') {
+                  const params = {
+                    ...this.ruleForm,
+                  }
+                  addWard(params).then(res => {
+                    if (res.code === 1) {
+                      this.$message.success('员工添加成功！')
+                      if (!st) {
+                        this.goBack()
+                      } else {
+                        this.ruleForm = {
+                          username: '',
+                          'name': '',
+                          'bedCount': '',
+                          'wardNumber': '',
+                          'deptId': '',
+                          'deptHead': '',
+                        }
+                      }
+                    } else {
+                      this.$message.error(res.msg || '操作失败')
+                    }
+                  }).catch(err => {
+                    this.$message.error('请求出错了：' + err)
+                  })
+                } else {
+                  const params = {
+                    ...this.ruleForm,
+                  }
+                  editWard(params).then(res => {
+                    if (res.code === 1) {
+                      this.$message.success('病房信息修改成功！')
+                      this.goBack()
+                    } else {
+                      this.$message.error(res.msg || '操作失败')
+                    }
+                  }).catch(err => {
+                    this.$message.error('请求出错了：' + err)
+                  })
+                }
+              } else {
+                console.log('error submit!!')
+                return false
+              }
+            })
+          },
+          // 获取所有医生的列表
+          getWardList () {
+              getDepartmentList().then(res => {
+                  if (res.code === 1) {
+                      this.deptList = res.data
+                  } else {
+                      this.$message.error(res.msg || '操作失败')
+                  }
+              })
+          },
+          goBack(){
+            window.parent.menuHandle({
+              id: '4',
+              url: '/hospital_backend/page/ward/list.html',
+              name: '病房管理'
+            },false)
+          }
+        }
+      })
+    </script>
+</body>
+</html>

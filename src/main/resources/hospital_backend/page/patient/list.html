@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="../../plugins/element-ui/lib/theme-chalk/index.css"/>
+  <link rel="stylesheet" href="../../styles/common.css" />
+  <link rel="stylesheet" href="../../styles/page.css" />
+  <style>
+    #member-app  .notAdmin::after{
+      border: 0 !important;
+
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container" id="patient-app">
+    <div class="container">
+
+      <!--搜索栏和添加功能-->
+      <div class="tableBar">
+
+        <!--根据姓名搜索病人信息-->
+        <el-input
+          v-model="input"
+          placeholder="请输入病人姓名"
+          style="width: 250px"
+          clearable
+           @keyup.enter.native="handleQuery"
+        >
+          <i
+            slot="prefix"
+            class="el-input__icon el-icon-search"
+            style="cursor: pointer"
+            @click="handleQuery"
+          ></i>
+        </el-input>
+
+        <!--添加病人信息-->
+        <el-button
+          type="primary"
+          @click="addMemberHandle('add')"
+        >
+          添加病人
+        </el-button>
+      </div>
+
+      <!--病人信息展示-->
+      <el-table
+        :data="tableData"
+        stripe
+        class="tableBox"
+      >
+        <el-table-column
+          prop="name"
+          label="病人姓名"
+        ></el-table-column>
+
+        <el-table-column
+          prop="wardName"
+          label="病床号"
+        ></el-table-column>
+
+        <el-table-column
+            prop="disease"
+            label="现病史"
+        ></el-table-column>
+
+        <el-table-column
+            prop="employeeName"
+            label="主治医生"
+        ></el-table-column>
+
+        <el-table-column
+            prop="admissionDate"
+            label="入院日期"
+        ></el-table-column>
+
+        <el-table-column
+            prop="dischargeDate"
+            label="出院日期"
+        ></el-table-column>
+
+        <el-table-column
+            prop="transferRecords"
+            label="转院记录"
+        ></el-table-column>
+
+        <el-table-column label="账号状态">
+          <template slot-scope="scope">
+            {{ String(scope.row.status) === '0' ? '已禁用' : '正常' }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          width="160"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              size="small"
+              class="blueBug"
+              @click="addMemberHandle(scope.row.id)"
+              :class="{notAdmin:user !== 'admin'}"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="text"
+              size="small"
+              class="delBut non"
+              @click="deleteHandle(scope.row.id)"
+              v-if="user === 'admin'"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!--分页查询操作-->
+      <el-pagination
+        class="pageList"
+        :page-sizes="[2, 4, 6, 8]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="counts"
+        :current-page.sync="page"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      ></el-pagination>
+    </div>
+  </div>
+    <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+    <script src="../../plugins/vue/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/lib/index.js"></script>
+    <!-- 引入axios -->
+    <script src="../../plugins/axios/axios.min.js"></script>
+    <script src="../../js/request.js"></script>
+    <script src="../../api/patient.js"></script>
+    <script>
+      new Vue({
+        el: '#patient-app',
+        data() {
+          return {
+             input: '',//搜索时输入的
+             counts: 0,
+             page: 1,
+             pageSize: 6,
+             tableData : [],
+             id : '',
+             status : '',
+          }
+        },
+        computed: {},
+        created() {
+          this.init()
+          this.user = JSON.parse(localStorage.getItem('userInfo')).username
+        },
+        mounted() {
+        },
+        methods: {
+          //初始化参数
+          async init () {
+            const params = {
+              page: this.page,
+              pageSize: this.pageSize,
+              name: this.input ? this.input : undefined
+            }
+            //获取页面数据
+            await getPatientList(params).then(res => {
+              if (String(res.code) === '1') {
+                  console.log(this.tableData);
+                  this.tableData = res.data.records || []
+                  this.counts = res.data.total
+              }
+            }).catch(err => {
+              this.$message.error('请求出错了：' + err)
+            })
+          },
+
+          //根据某某信息查询数据
+          handleQuery() {
+            this.page = 1;
+            this.init();
+          },
+           // 添加
+          addMemberHandle (st) {
+            if (st === 'add'){
+              window.parent.menuHandle({
+                id: '3',
+                url: '/hospital_backend/page/patient/add.html',
+                name: '添加病人信息'
+              },true)
+            } else {
+              window.parent.menuHandle({
+                id: '3',
+                url: '/hospital_backend/page/patient/add.html?id='+st,
+                name: '修改病人信息'
+              },true)
+            }
+          },
+          //删除病人信息
+          deleteHandle(id) {
+              this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                  'confirmButtonText': '确定',
+                  'cancelButtonText': '取消',
+                  'type': 'warning'
+              }).then(() => {
+                  deletePatient(id).then(res => {
+                      if (res.code === 1) {
+                          this.$message.success('删除成功！')
+                          this.handleQuery()
+                      } else {
+                          this.$message.error(res.msg || '操作失败')
+                      }
+                  }).catch(err => {
+                      this.$message.error('请求出错了：' + err)
+                  })
+              })
+          },
+
+          //分页查询的一个页面大小
+          handleSizeChange (val) {
+            this.pageSize = val
+            this.init()
+          },
+          //分页查询的多少页
+          handleCurrentChange (val) {
+            this.page = val
+            this.init()
+          }
+        }
+      })
+    </script>
+</body>
+</html>
