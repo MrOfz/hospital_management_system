@@ -26,5 +26,6 @@ public class Test1 {
         System.out.println("test222");
         System.out.println("testOfHotFix");
         System.out.println("master test");
+        System.out.println("hot-fix test");
     }
 }
